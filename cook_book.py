@@ -1,58 +1,54 @@
-def adding_a_recipe():
-    """"Добавление рецепта"""
-    with open('a.txt','a') as fo:
-        name = input('введите название')
-        quantity = int(input('введите количество'))
+def read_recipes(ingredients=None):
+    recipes = []
+    with open('a.txt', 'r', encoding='utf-8') as file:
+        cook_book = {}
+        print(file)
+                for items in file:
+                    ingredient_data = lines[i].strip().split('|')
+                    ingredient = {
+                        'название ингредиента': ingredient_data[0].strip(),
+                        'количество': ingredient_data[1].strip(),
+                        'единица измерения': ingredient_data[2].strip(),
+                    }
+                    ingredients.append(ingredient)
+                    i += 1
+                recipe['ингредиенты'] = ingredients
+                recipes.append(recipe)
+            except Exception as e:
+                print(f"Ошибка в парсинге рецепта: {e}")
+                i += 1
+    return recipes
+file_name = 'recipes.txt'
+cook_book = read_recipes(file_name)
+print(cook_book)
 
-        fo.write(f'{name}\n')
-        fo.write(f'{quantity}\n')
-        _ = 0
-        while _ != quantity:
-            name_ingr = input('введите название ингридиента')
-            quantiti_ingr = int(input('Введите количество ингридиента'))
-            measure = input('Введите единицу измерения')
-            fo.write(f'{name_ingr},{quantiti_ingr},{measure}\n')
-            _ +=1
 
-def reading_the_recipe():
-    ''''Чтение рецептов в словарь'''
-    with open('a.txt', 'r') as fo:
-        cook_book_1 = {}
-        for l in fo:
-            name = l.strip()
-            ing_quan = int(fo.readline().strip())
+def get_shop_list_by_dishes(dishes, person_count, recipes):
+    shop_list = {}
+    for dish_name in dishes:
+        for recipe in recipes:
+            if recipe['название'] == dish_name:
+                for ingredient in recipe['ингредиенты']:
+                    ingredient_name = ingredient['название ингредиента']
+                    measure = ingredient['единица измерения']
+                    quantity = int(ingredient['количество']) * person_count
 
-            my_list = []
-            for i in range(ing_quan):
-                ingr = fo.readline().split(',')
-                ingridients = {'ingridients_name': ingr[0].strip(), 'quantity': ingr[1].strip(),
-                               'measure': ingr[2].strip()}
-                # print(ingr)
-                my_list.append(ingridients)
-                cook_book_1[name] = my_list
-    # for item  in cook_book_1:
-    # print(cook_book_1)
-    return cook_book_1
+                    if ingredient_name not in shop_list:
+                        shop_list[ingredient_name] = {'measure': measure, 'quantity': quantity}
+                    else:
+                        if shop_list[ingredient_name]['measure'] == measure:
+                            shop_list[ingredient_name]['quantity'] += quantity
+                        else:
+                            print(f"Единицы измерения для '{ingredient_name}' не совпадают. Проверьте рецепты.")
+    return shop_list
 
-def calculation_ingridients(dish_list,person_number):
-    ''''расчет количества ингридиентов'''
-    print(dish_list,person_number)
+if __name__ == "__main__":
+    file_path = "cook_book.txt"
+    recipes = read_recipes(file_path)
+    dishes = ['Запеченный картофель', 'Омлет']
+    person_count = 2
 
-    with open('a.txt', 'r') as fo:
+    shop_list = get_shop_list_by_dishes(dishes, person_count, recipes)
 
-        cooc_b = {}
-
-        for l in fo:
-            name = l.strip()
-            ing_quan = int(fo.readline().strip())
-            # print(name, ing_quan)
-            my_list = []
-
-            for i in range(ing_quan):
-                ingr = fo.readline().split(',')
-                # print(ingr)
-                ing_q = int(ingr[1])
-                ing_q *= person_number
-                if name in dish_list:
-                    cooc_b[ingr[0]] = {'measure': ingr[2].strip(), 'quantity': ing_q}
-        print(cooc_b)
+    for ingredient, info in shop_list.items():
+        print(f"{ingredient}: {info['quantity']} {info['measure']}")
